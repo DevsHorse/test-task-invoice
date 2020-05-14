@@ -1,5 +1,5 @@
 import React from 'react';
-import API from '../model';
+import API from './model';
 import { Link } from 'react-router-dom';
 
 class RegisterPage extends React.Component {
@@ -20,7 +20,7 @@ class RegisterPage extends React.Component {
   }
 
   handleInputs(e: any): void {
-    this.setState({ [e.target.name]: e.target.value, dob: new Date().toLocaleString() });
+    this.setState({ [e.target.name]: e.target.value, dob: new Date().toUTCString() });
   }
 
   register(e: any): void {
@@ -31,7 +31,7 @@ class RegisterPage extends React.Component {
     }
 
     API.register(this.state)
-       .then((res: any) => {
+       .then(res => {
          this.setState({ userId: res.id });
          this.props.history.goBack();
       })
@@ -39,6 +39,7 @@ class RegisterPage extends React.Component {
   }
 
   render() {
+
     return (
       <div className="section">
         <div className="row register-block bg-register rounded text-white text-center justify-content-center p-4">

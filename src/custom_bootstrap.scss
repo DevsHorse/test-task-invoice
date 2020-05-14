@@ -5,7 +5,16 @@
 $theme-colors: (
   "danger": #ff4136,
   "fish": #461475,
-  "register": #272629
+  "register": #272629,
+  "header": #666,
+  "list-item": rgba(71, 71, 71, 0.87),
+  "aside": rgb(48, 48, 48),
+  "log-out": rgb(63, 63, 63),
+  "add-btn": rgb(9, 128, 68),
+  "delete": rgb(48, 46, 46),
+  "product": rgb(255, 255, 255),
+  "add-product": rgb(28, 119, 76),
+  "half-white": rgba(255, 255, 255, 0.507)
 );
 
 @import "../node_modules/bootstrap/scss/bootstrap";

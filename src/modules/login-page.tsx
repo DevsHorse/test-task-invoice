@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import API from '../model';
-import { setCookie, getAuthCookie } from './reusable/cookie';
+import API from './model';
 
 class LoginPage extends React.Component {
   public state: any;
@@ -54,6 +53,7 @@ class LoginPage extends React.Component {
   }
   
   render() {
+
     return (
       <div className="section">
         <div className="row register-block bg-register rounded text-white text-center justify-content-center p-4">

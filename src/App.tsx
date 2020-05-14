@@ -2,12 +2,12 @@
 import LoginPage from './modules/login-page';
 import RegisterPage from './modules/register-page';
 import HomePage from './modules/home-page';
+import AddEditInvoice from './modules/add-edit-invoice';
 
-//Library
+//Lib
 import React from 'react';
 import { BrowserRouter as Router, Switch, Route, Redirect } from "react-router-dom";
-
-import { setCookie, getAuthCookie } from './modules/reusable/cookie';
+import { setCookie, getAuthCookie } from './modules/cookie/cookie';
 
 //Styles
 import './custom_bootstrap.scss';
@@ -26,7 +26,7 @@ interface Cookie {
 }
 
 class App extends React.Component {
-
+  history: any;
   state: any;
   cookie: Cookie;
 
@@ -58,19 +58,19 @@ class App extends React.Component {
       <div>
         <Router basename={process.env.PUBLIC_URL}>
           <Switch>
-            <Route exact path='/'>
-               <Redirect to='/login'/>
-            </Route>
+            <Route exact path='/'><Redirect to='/login'/></Route>
   
             <Route path='/login'>
             {this.state.isAuth ? (<Redirect to='/home'/>) : (<LoginPage stateHandler={this.stateHandler} />)}
             </Route>
   
             <Route path='/register' component={RegisterPage}/>
+            <Route path='/add-edit-invoice' component={AddEditInvoice} />
   
             <Route path='/home'>
               {this.state.isAuth ? (<HomePage userData={this.state} stateHandler={this.stateHandler}/>) : (<Redirect to='/login'/>)}
             </Route>
+
           </Switch>
        </Router>
       </div>
