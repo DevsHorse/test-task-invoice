@@ -41,9 +41,9 @@ class AddEditInvoice extends React.Component {
     }
 
     return (
-      <div>
+      <div className="home-bg">
         <div className="section">
-          <div className="row register-block bg-register rounded text-white text-center justify-content-center p-4">
+          <div className="row register-block bg-forms rounded text-white text-center justify-content-center p-4">
             <div className="col-12">    
               
               <AddEditForm

@@ -76,8 +76,11 @@ class AddEditForm extends React.Component {
         customerId: customerId
        };
 
-      API.updateInvoiceById(this.props.userData.token, this.props.invoiceData.invoiceId, data)
-      .then(invoice =>  {
+      API.updateInvoiceById(
+        this.props.userData.token,
+        this.props.invoiceData.invoiceId,
+        data
+      ).then(invoice =>  {
         this.setState({customer: invoice.customerId});
       });
     }
@@ -133,59 +136,56 @@ class AddEditForm extends React.Component {
     });
 
     if (this.pageMod === 'add') this.setState({products: [...newProducts]}); 
-    else {
-
-      let invoiceData: any = {
-        total: this.state.totalInvoicePrice
-      };
-  
-      API.updateInvoiceById(this.props.userData.token, this.props.invoiceData.invoiceId, invoiceData).then(invoiceRes => {
-        this.state.products.forEach((product: any) => {
-          
-          let itemData = {
-            quantity: product.quantity,
-            productId: product.id,
-            invoiceId: this.props.invoiceData.invoiceId
-          };
-  
-          API.updateItemById(this.props.userData.token, this.props.invoiceData.invoiceId, product.itemId, itemData).then((res) => {
-            this.setState({products: [...newProducts]}); 
-          })
-        });
-      });
-    }
+    else this.updateInvoiceAndItemsHandler('quantity', newProducts);
   }
 
   deleteProductHandler(uniqId: string): void {
-    if (this.pageMod === 'add')
-    this.setState({ products: [...this.state.products.filter((product: any) => product.uniqId !== uniqId)]});
+
+    const newStateData = {
+        products: [
+          ...this.state.products.filter(
+            (product: any) => product.uniqId !== uniqId
+          )
+        ]
+    };
+
+    if (this.pageMod === 'add') this.setState(newStateData);
     else {
-      let currentItem = this.state.products.filter((product: any) => product.uniqId === uniqId)[0];
-      API.deleteItemById(this.props.userData.token, this.props.invoiceData.invoiceId, currentItem.itemId).then(res => {
-        this.setState({ products: [...this.state.products.filter((product: any) => product.uniqId !== uniqId)]});
-      });
-    }
+          let currentItem = this.state.products.filter(
+            (product: any) => product.uniqId === uniqId
+          )[0];
+
+          API.deleteItemById(
+            this.props.userData.token, 
+            this.props.invoiceData.invoiceId,
+            currentItem.itemId
+          ).then(() => this.setState(newStateData));
+        }
   }
 
   setProductItemInList() {
 
     let items: object[] = [];
 
-    this.state.products.forEach((item: any) => {
-      this.props.products.forEach((product: any) => {
-        if (product.id === item.id) {
-          let component = (
-            <ProductItem
-             product={product} 
-             key={item.id + '/' + (Math.random() * 10000)} 
-             deleteProductHandler={this.deleteProductHandler} 
-             quantityHandler={this.quantityHandler}
-             itemOptions={item}/>
-          );
+    this.state.products.forEach(
+      (item: any) => {
+        this.props.products.forEach(
+          (product: any) => {
 
-          items.push(component);
-        }
-      });
+            if (product.id === item.id) {
+              let component = (
+                <ProductItem
+                product={product} 
+                key={item.id + '/' + (Math.random() * 10000)} 
+                deleteProductHandler={this.deleteProductHandler} 
+                quantityHandler={this.quantityHandler}
+                itemOptions={item}/>
+              );
+
+              items.push(component);
+            }
+
+        });
     });
 
     return items;
@@ -201,10 +201,11 @@ class AddEditForm extends React.Component {
        total: this.state.totalInvoicePrice
       };
 
-     API.updateInvoiceById(this.props.userData.token, this.props.invoiceData.invoiceId, data)
-     .then(() =>  {
-      this.setState({discount: discountValue});
-     });
+     API.updateInvoiceById(
+       this.props.userData.token, 
+       this.props.invoiceData.invoiceId, 
+       data
+    ).then(() => this.setState({discount: discountValue}));
    }
   }
 
@@ -222,42 +223,63 @@ class AddEditForm extends React.Component {
       total: this.state.totalInvoicePrice
     }
 
-    API.setInvoice(this.props.userData.token, invoiceData).then(invoiceRes => {
-      this.state.products.forEach((product: any) => {
+    API.setInvoice(
+      this.props.userData.token, 
+      invoiceData
+      ).then(invoiceRes => {
 
-        let itemData = {
-          quantity: product.quantity,
-          productId: product.id,
-          invoiceId: invoiceRes.id
-        };
+        this.state.products.forEach((product: any) => {
 
-        API.setItemToInvoice(this.props.userData.token, itemData).then(() => {
-          this.props.history.push('/home');
-        })
+          let itemData = {
+            quantity: product.quantity,
+            productId: product.id,
+            invoiceId: invoiceRes.id
+          };
+
+          API.setItemToInvoice(
+            this.props.userData.token, 
+            itemData
+          ).then(() => this.props.history.push('/home'));
       });
     });
   }
 
   setAddButton(): React.ReactNode | undefined {
     if (this.pageMod === 'add') {
-      return (<button className="btn btn-success" onClick={this.addInvoice}>Add invoice</button>);
+      return (
+        <button 
+          className="btn btn-add-btn" 
+          onClick={this.addInvoice}
+        >Add invoice</button>
+      );
     } 
   }
 
   setCancelButton(): React.ReactNode {
     if (this.pageMod === 'add') {
-      return (<Link to='/home'><button className="btn btn-danger ml-2">Cancel</button></Link>);
+      return (
+        <Link to='/home'>
+          <button className="btn btn-home-delete ml-2">Cancel</button>
+        </Link>
+      );
     } else {
-      return (<button className="btn btn-danger ml-2" onClick={(e) => {
-        e.preventDefault();
-        this.setState({redirect: true});
-      }}>Cancel</button>)
+      return (
+        <button 
+          className="btn btn-home-delete ml-2" 
+          onClick={(e) => 
+            {
+              e.preventDefault();
+              this.setState({redirect: true});
+            }
+          }
+        >Cancel</button>
+      )
     }
   }
 
-  updateInvoiceAndItemsHandler(mode: string, quantityArray?: object[]): void {
+  updateInvoiceAndItemsHandler(mode: string, quantityArray?: any): void {
 
-   let invoiceData: InvoiceData = {
+    let invoiceData: InvoiceData = {
       customerId: this.state.customer,
       createdById: this.props.userData.userId,
       discount: this.state.discount,
@@ -270,7 +292,11 @@ class AddEditForm extends React.Component {
       };
     }
 
-    API.updateInvoiceById(this.props.userData.token, this.props.invoiceData.invoiceId, invoiceData).then(invoiceRes => {
+    API.updateInvoiceById(
+      this.props.userData.token, 
+      this.props.invoiceData.invoiceId, 
+      invoiceData
+    ).then(invoiceRes => {
       this.state.products.forEach((product: any) => {
 
         let itemData = {
@@ -279,28 +305,37 @@ class AddEditForm extends React.Component {
           invoiceId: this.props.invoiceData.invoiceId
         };
 
-        API.updateItemById(this.props.userData.token, this.props.invoiceData.invoiceId, product.itemId, itemData).then((res) => {
-          if (mode === 'done') {
-            this.props.history.push('/home');
-          } else if (mode === 'quantity') {
-            this.setState({products: [...quantityArray]});
-          }
-        })
+        API.updateItemById(
+          this.props.userData.token, 
+          this.props.invoiceData.invoiceId, 
+          product.itemId, 
+          itemData
+        ).then((res) => {
+          if (mode === 'done') this.props.history.push('/home');
+          else if (mode === 'quantity') this.setState({products: [...quantityArray]});
+        });
       });
     });
   }
 
-  //Pull data
   setEditState(): void {
-    API.getInvoiceById(this.props.userData.token, this.props.invoiceData.invoiceId).then(invoiceRes => {
-      API.getItemsOfInvoice(this.props.userData.token, this.props.invoiceData.invoiceId)
-      .then(items => {
+    API.getInvoiceById(
+      this.props.userData.token, 
+      this.props.invoiceData.invoiceId
+    ).then(invoiceRes => {
+
+      API.getItemsOfInvoice(
+        this.props.userData.token, 
+        this.props.invoiceData.invoiceId
+      ).then(items => {
 
         let productsArray: any = [];
 
         items.forEach((item: any, i: number) => {
 
-          let currentProduct = this.props.products.filter((product: any) => item.productId === product.id)[0];
+          let currentProduct = this.props.products.filter(
+            (product: any) => item.productId === product.id
+          )[0];
 
           let newItem = {
             id: item.productId,
@@ -319,7 +354,7 @@ class AddEditForm extends React.Component {
             customer: invoiceRes.customerId,
             products: productsArray,
             discount: invoiceRes.discount
-          })
+          });
         }
       });
 
@@ -332,36 +367,13 @@ class AddEditForm extends React.Component {
     }
 
     if (this.state.redirect) {
-      let invoiceData: InvoiceData = {
-        customerId: this.state.customer,
-        createdById: this.props.userData.userId,
-        discount: this.state.discount,
-        total: this.state.totalInvoicePrice
-      }
-  
-      API.updateInvoiceById(this.props.userData.token, this.props.invoiceData.invoiceId, invoiceData).then(invoiceRes => {
-        this.state.products.forEach((product: any) => {
-  
-          let itemData = {
-            quantity: product.quantity,
-            productId: product.id,
-            invoiceId: this.props.invoiceData.invoiceId
-          };
-  
-          API.updateItemById(this.props.userData.token, this.props.invoiceData.invoiceId, product.itemId, itemData).then((res) => {
-            this.props.history.push('/home');
-          })
-        });
-      });
+      this.updateInvoiceAndItemsHandler('done');
     }
-
-    console.log(this.props);
-    // console.log(this.state);
 
     return (
       <form>
-{/* Total input */}
-                <div className="row">
+{/* Total */}
+                <div className="row mb-3">
                   <div className="col-12 text-left">
                     <div className="total ts-2 h3">Total price: {this.state.totalInvoicePrice}</div>
                   </div>
@@ -380,7 +392,10 @@ class AddEditForm extends React.Component {
 
 {/* Product input */}
                 
-                <ProductsInput products={this.props.products} addProductHandler={this.addProductHandler}/>
+                <ProductsInput
+                 products={this.props.products} 
+                 addProductHandler={this.addProductHandler}
+                />
 
 {/* Added products */}
                 <div className="row">
@@ -390,17 +405,18 @@ class AddEditForm extends React.Component {
                 </div>
 
 {/* Discount and ADD */}
-                <div className="row justify-content-between mt-3">
-                  <div className="col-5">
+                <div className="row justify-content-between mt-3 align-items-end">
+                  <div className="col-lg-5 col-md-5 col-sm-12 text-left">
+                    <label htmlFor="discount-input">Discount</label>
                     <input 
                     type="text" 
                     className="form-control" 
-                    id="formGroupExampleInput" 
+                    id="discount-input" 
                     placeholder="Discount in %" 
                     onChange={this.discountHandler} 
                     value={this.state.discount === 0 ? '' : this.state.discount}/>
                   </div>
-                  <div className="col-5 text-right">
+                  <div className="col-lg-5 col-md-5 col-sm-12 text-right add-invoice-form-btn">
                     {this.setAddButton()}
                     {this.setCancelButton()}
                   </div>

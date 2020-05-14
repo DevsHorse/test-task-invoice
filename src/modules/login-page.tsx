@@ -55,14 +55,15 @@ class LoginPage extends React.Component {
   render() {
 
     return (
-      <div className="section">
-        <div className="row register-block bg-register rounded text-white text-center justify-content-center p-4">
+      <div className="section home-bg">
+        <div className="row register-block bg-forms rounded text-white text-center justify-content-center p-4">
           
           <form>
             <h1 className="text-center">Login</h1>
             <div className="text-danger">{this.state.error}</div>
 
             <div className="row">
+              <div className="col-12">
                   <div className="form-group">
                     <label htmlFor="login-email">Email</label>
                     <input 
@@ -74,8 +75,10 @@ class LoginPage extends React.Component {
                       value={this.state.userData.email}
                     />
                   </div>
-              
-                  <div className="form-group ml-2">
+              </div>
+                  
+              <div className="col-12">
+                  <div className="form-group">
                     <label htmlFor="login-password">Password</label>
                     <input 
                       type="password" 
@@ -86,10 +89,12 @@ class LoginPage extends React.Component {
                       value={this.state.userData.password}
                     />
                   </div>
+              </div>
+                  
             </div>
             
             <div className="row justify-content-center">
-              <div className="col-6">
+              <div className="col">
                 <button 
                   type="submit" 
                   className="btn btn-fish btn-block"
@@ -97,11 +102,11 @@ class LoginPage extends React.Component {
                 >Sign in ⚡</button>
               </div>
               
-              <div className="col-6">
-              <Link to='/register'>
+              <div className="col ml-2">
+              <Link to='/register' className="text-decoration-none">
                 <button 
                   type="button" 
-                  className="btn btn-fish btn-block"
+                  className="btn btn-edit-btn btn-block"
                 >Register</button></Link>
               </div>
               

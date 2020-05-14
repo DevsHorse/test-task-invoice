@@ -48,14 +48,13 @@ class HomePage extends React.Component {
 
     return (
 
-      <div>
-
+      <div className="home-page">
         <div className="row content-home">
-          <div className="col-2 mh-100 bg-aside aside-content">
-            <h2 className="m-3 text-white logo">SWolf ☪</h2>
-            <div className="col d-flex flex-column justify-content-between" style={{height: '85%'}}>
+          <div className="col-lg-2 col-md-2 col-sm-12 mh-100 bg-aside aside-content">
+            <h2 className="m-3 text-white text-center logo">Wolf ☪ Inc.</h2>
+            <div className="col d-flex flex-column justify-content-between text-center" style={{height: '85%'}}>
               <Link to={addInvoiceProps}>
-                <button className="btn btn-add-btn mt-3 border-white add-btn">Add invoice</button>
+                <button className="btn btn-add-btn mt-3 border-white add-btn w-100">Add invoice</button>
               </Link>
               <button
                className="btn btn-log-out border-secondary log-out" 

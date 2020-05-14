@@ -36,11 +36,11 @@ const ProductsInput = (props: any) => {
 
   return (
     <div className="row mb-3">
-      <div className="col-12">
+      <div className="col-12 text-left">
         <label htmlFor="add-product">Product</label>
       </div>
 
-      <div className="col-8">
+      <div className="col-lg-8 col-md-8 col-sm-12">
           <select className="form-control" id="add-product" onChange={selectHandler}>
             <option value="none">Select product</option>
 
@@ -49,7 +49,7 @@ const ProductsInput = (props: any) => {
           </select>
       </div>
 
-      <div className="col-4 text-right">
+      <div className="col-lg-4 col-md-4 col-sm-12 text-right add-product-btn">
         <button className="btn btn-add-product" onClick={addProduct}>Add product</button>
       </div>  
     </div>

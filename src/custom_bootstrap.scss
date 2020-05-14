@@ -7,14 +7,17 @@ $theme-colors: (
   "fish": #461475,
   "register": #272629,
   "header": #666,
-  "list-item": rgba(71, 71, 71, 0.87),
-  "aside": rgb(48, 48, 48),
-  "log-out": rgb(63, 63, 63),
-  "add-btn": rgb(9, 128, 68),
+  "list-item": rgba(31, 31, 31, 0.623),
+  "aside": rgb(29, 29, 29),
+  "log-out": rgb(48, 43, 35),
+  "add-btn": rgb(192, 115, 51),
   "delete": rgb(48, 46, 46),
-  "product": rgb(255, 255, 255),
+  "product": rgba(248, 191, 117, 0.897),
   "add-product": rgb(28, 119, 76),
-  "half-white": rgba(255, 255, 255, 0.507)
+  "half-white": rgba(255, 255, 255, 0.507),
+  "edit-btn": rgba(46, 46, 46, 0.616),
+  "home-delete": rgba(192, 38, 38, 0.753),
+  "forms": rgba(3, 3, 3, 0.637)
 );
 
 @import "../node_modules/bootstrap/scss/bootstrap";

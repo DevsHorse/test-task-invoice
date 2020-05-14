@@ -29,7 +29,7 @@ const CustomerInput = (props: any) => {
    props.invoiceData !== {} ? props.invoiceData.customerId : false;
 
   return (
-    <div className="col-12">
+    <div className="col-12 text-left">
       <label htmlFor="add-customer">Customer</label>
       <select
        className="form-control" 

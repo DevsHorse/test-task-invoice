@@ -63,12 +63,6 @@ class ItemsList extends React.Component {
 
     this.state.invoices.forEach((invoiceData: any) => {
 
-      // let editInvoiceProps = {
-      //   ...this.props.editInvoiceProps
-      // };
-
-      // editInvoiceProps.state.invoiceData = invoiceData;
-
       let item =  (
         <InvoiceItem
          key={invoiceData.invoiceId} 
@@ -100,8 +94,14 @@ class ItemsList extends React.Component {
     }
 
     return(
-      <div className="col-9 p-2 invoices-list">
-        {this.setInvoicesItems()}
+      <div className="col-lg-9 col-md-9 col-sm-12 col-xs-11 p-2 invoices-list">
+        {
+         this.state.invoices.length
+         ? this.setInvoicesItems()
+         : this.state.init === true 
+         ? (<h1 className="text-center h2 mt-4">You don't have invoices yet.</h1>) 
+         : ''
+        }
       </div>
     );
   }

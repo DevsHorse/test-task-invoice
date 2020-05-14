@@ -22,7 +22,7 @@ const ProductItem = (props: any) => {
         
         <div className="col-2 d-flex justify-content-between">
           <input
-           className="w-100" 
+           className="w-100 bg-product" 
            type="number" 
            id="quantity" 
            value={props.itemOptions.quantity} 

@@ -41,13 +41,14 @@ class RegisterPage extends React.Component {
   render() {
 
     return (
-      <div className="section">
-        <div className="row register-block bg-register rounded text-white text-center justify-content-center p-4">
+      <div className="section home-bg">
+        <div className="row register-block bg-forms rounded text-white text-center justify-content-center p-4">
           
           <form>
             <h1 className="text-center">Register</h1>
   
             <div className="row">
+              <div className="col-lg col-md-6 col-sm-12">
                   <div className="form-group">
                     <label htmlFor="register-name">Name</label>
                     <input
@@ -59,8 +60,10 @@ class RegisterPage extends React.Component {
                       value={this.state.name}
                     />
                   </div>
-  
-                  <div className="form-group ml-2">
+              </div>
+                 
+              <div className="col-lg-6 col-md-6 col-sm-12">
+                 <div className="form-group ml-2 ml-sm-0">
                     <label htmlFor="register-username">User name</label>
                     <input
                       type="text" 
@@ -71,9 +74,12 @@ class RegisterPage extends React.Component {
                       value={this.state.username}
                     />
                   </div>
+              </div>
+                  
             </div>
                   
             <div className="row">
+              <div className="col-lg-12 col-md-6 col-sm-12">
                   <div className="form-group">
                     <label htmlFor="register-email">Email</label>
                     <input 
@@ -85,8 +91,10 @@ class RegisterPage extends React.Component {
                       value={this.state.email}
                     />
                   </div>
-              
-                  <div className="form-group ml-2">
+              </div>
+                  
+              <div className="col-lg-12 col-md-6 col-sm-12">
+                 <div className="form-group">
                     <label htmlFor="register-password">Password</label>
                     <input 
                       type="password" 
@@ -97,9 +105,11 @@ class RegisterPage extends React.Component {
                       value={this.state.password}
                     />
                   </div>
+              </div>
+                  
             </div>
            
-           <div className="row justify-content-center">
+           <div className="row justify-content-center text-center">
             <div className="col-6">
               <button 
                 type="submit" 
@@ -109,10 +119,10 @@ class RegisterPage extends React.Component {
             </div>
             
             <div className="col-6">
-            <Link to='/login'>
+            <Link to='/login' className="text-decoration-none">
               <button 
                 type="button" 
-                className="btn btn-fish btn-block"
+                className="btn btn-edit-btn btn-block"
               >Sign in</button></Link>
             </div>
            </div>
