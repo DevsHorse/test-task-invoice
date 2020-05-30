@@ -6,76 +6,75 @@ import AddEditInvoice from './modules/add-edit-invoice';
 
 //Lib
 import React from 'react';
-import { BrowserRouter as Router, Switch, Route, Redirect } from "react-router-dom";
-import { setCookie, getAuthCookie } from './modules/cookie/cookie';
+import { setCookie } from './modules/cookie/cookie';
+import { 
+  BrowserRouter as Router,
+  Switch, 
+  Route, 
+  Redirect 
+} from 'react-router-dom';
+import AuthContext, {
+   authDataFromCookie, 
+   AuthData, 
+   IContext 
+} from './modules/context';
 
 //Styles
 import './custom_bootstrap.scss';
 import './styles/main.sass';
 
-interface UserData {
-  isAuth: boolean,
-  userId: string,
-  accessToken: string
-}
-
-interface Cookie {
-      isAuth?: boolean,
-      userId?: string,
-      accessToken?: string
-}
 
 class App extends React.Component {
-  history: any;
-  state: any;
-  cookie: Cookie;
+  static contextType = AuthContext;
+  public state: IContext;
 
   constructor(props: any) {
     super(props);
-    this.stateHandler = this.stateHandler.bind(this);
-    this.cookie = getAuthCookie();
+
     this.state = {
-      isAuth: this.cookie !== {} ? this.cookie.isAuth : false,
-      userId: this.cookie !== {} ? this.cookie.userId : '',
-      accessToken: this.cookie !== {} ? this.cookie.accessToken : '',
+      authData: authDataFromCookie,
+      handleState: this.handleState,
     };
   }
 
-  stateHandler(userData: UserData): void {
-
-    const dataBox: UserData = {
-      isAuth: userData.isAuth,
+  handleState = (userData: AuthData): void => {
+    const newAuthData: AuthData = {
+      isAuthenticated: userData.isAuthenticated,
       userId: userData.userId,
-      accessToken: userData.accessToken 
+      accessToken: userData.accessToken,
     };
 
-    setCookie('auth', JSON.stringify(dataBox), 2100, 10, 1);
-    this.setState(dataBox);
-  }
+    setCookie('auth', JSON.stringify(newAuthData), 2100, 10, 1);
+    this.setState({ authData: newAuthData });
+  };
 
   render() {
+    const isAuthenticated = this.state.authData.isAuthenticated;
+    const loginRoute = isAuthenticated ? <Redirect to="/home" /> : <LoginPage />;
+    const homeRoute = isAuthenticated ? <HomePage /> : <Redirect to="/login" />;
+
     return (
       <div>
         <Router basename={process.env.PUBLIC_URL}>
           <Switch>
-            <Route exact path='/'><Redirect to='/login'/></Route>
-  
-            <Route path='/login'>
-            {this.state.isAuth ? (<Redirect to='/home'/>) : (<LoginPage stateHandler={this.stateHandler} />)}
-            </Route>
-  
-            <Route path='/register' component={RegisterPage}/>
-            <Route path='/add-edit-invoice' component={AddEditInvoice} />
-  
-            <Route path='/home'>
-              {this.state.isAuth ? (<HomePage userData={this.state} stateHandler={this.stateHandler}/>) : (<Redirect to='/login'/>)}
-            </Route>
+            <AuthContext.Provider value={this.state}>
 
+              <Route exact path="/"> Redirect to="/login" /> </Route>
+
+              <Route path="/login"> {loginRoute} </Route>
+
+              <Route path="/home"> {homeRoute} </Route>
+              
+              <Route path="/register" component={RegisterPage} />
+
+              <Route path="/add-edit-invoice" component={AddEditInvoice} />
+
+            </AuthContext.Provider>
           </Switch>
-       </Router>
+        </Router>
       </div>
     );
-  } 
+  }
 }
 
 export default App;

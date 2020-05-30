@@ -1,14 +1,16 @@
 import React from 'react';
 
+
 const CustomerInput = (props: any) => {
+
 
   const setCustomersOption = (): object[] => {
     let options: object[] = [];
 
-    props.customers.forEach((customer: any, i: number) => {
+    props.customers.forEach((customer: any) => {
 
         let option: object  = (
-          <option key={i} value={customer.id}>
+          <option key={customer.id} value={customer.id}>
             {customer.name + ' --- ' + ' Address: ' + customer.address}
           </option>
         );
@@ -20,9 +22,9 @@ const CustomerInput = (props: any) => {
   };
 
 
-  const setCustomerState = (e: any): void => {
-    e.preventDefault();
-    props.customerHandler(e.target.value);
+  const setCustomerState = (event: React.ChangeEvent<HTMLSelectElement>): void => {
+    event.preventDefault();
+    props.customerHandler(event.target.value);
   };
 
   let selectValue = props.customerId ? props.customerId :

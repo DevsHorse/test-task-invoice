@@ -1,107 +1,125 @@
+//Lib
 import React from 'react';
-import InvoiceItem from './invoice-item';
 import API from '../model';
+import AuthContext from '../context';
 
-interface InvoiceData {
-  invoiceId: string,
-  total: number,
-  discount: number,
-  customerId: string,
-  customerName: string
-}
+//Modules
+import InvoiceItem from './invoice-item';
+import {
+  InvoiceData,
+  ItemsListProps,
+  StateType 
+} from './home-modules-types';
 
 
 class ItemsList extends React.Component {
-  props: any;
-  state: any;
+  static contextType = AuthContext;
+  public props: ItemsListProps;
+  public state: StateType;
 
-  constructor(props: any) {
+  constructor(props: ItemsListProps) {
     super(props);
-    this.getAPI = this.getAPI.bind(this);
-    this.initHandler = this.initHandler.bind(this);
+    this.props = props;
     this.state = {
       invoices: [],
-      init: false
-    }
+      init: false,
+    };
   }
 
-  
-  getAPI() {
-    API.getInvoices(this.props.userData.accessToken).then(invoicesResponse => {
-      API.getCustomers(this.props.userData.accessToken).then(customers => {
-       
-        let invoicesArray: object[] = []; 
+  getAPI = (): void => {
+    Promise.all([
+      API.getInvoices(this.context.authData.accessToken),
+      API.getCustomers(this.context.authData.accessToken)
+    ])
+    .then(([invoicesResponse, customers]) => {
 
-        invoicesResponse.forEach((invoice: any) => {
+      let newCustomers = customers
+      .reduce((customersMap: any, entry: any) => {
+        customersMap[entry.id] = entry;
+        return customersMap;
+      }, {});
 
-          if (invoice.createdById === this.props.userData.userId) {
-            let invoiceCustomer: any = customers.filter((customer: any) => invoice.customerId === customer.id )[0];
+      let invoicesArray: object[] = invoicesResponse
+      .reduce((newArr: any, invoice: any) => {
 
-            let invoiceData: InvoiceData = {
-              invoiceId: invoice.id,
-              total: invoice.total,
-              discount: invoice.discount,
-              customerId: invoice.customerId,
-              customerName: invoiceCustomer.name
-            };
+        if (invoice.createdById === this.context.authData.userId) {
+          let invoiceCustomer: any = newCustomers[invoice.customerId];
 
-          invoicesArray.push(invoiceData);
-          }
-        });
+          let invoiceData: InvoiceData = {
+            invoiceId: invoice.id,
+            total: invoice.total,
+            discount: invoice.discount,
+            customerId: invoice.customerId,
+            customerName: invoiceCustomer.name
+          };
 
-        this.setState({
+          return newArr = [...newArr, invoiceData];
+        } else {
+          return newArr;
+        }
+      }, []);
+      
+      this.setState({
         invoices: invoicesArray,
         init: true
-        });
-
       });
     });
-  }
+  };
 
-  setInvoicesItems(): object[] {
-    let listItems: object[] = [];
+  getInvoicesItems = (): Array<React.ReactNode> | void => {
 
-    this.state.invoices.forEach((invoiceData: any) => {
+    if (this.state.invoices.length) {
+      let listItems: Array<React.ReactNode | null> = [];
 
-      let item =  (
-        <InvoiceItem
-         key={invoiceData.invoiceId} 
-         invoiceData={invoiceData} 
-         initHandler={this.initHandler} 
-         editInvoiceProps={this.props.editInvoiceProps}
-        />
+      this.state.invoices.forEach((invoiceData: any) => {
+
+        let item: React.ReactNode = (
+          <InvoiceItem
+            key={invoiceData.invoiceId}
+            invoiceData={invoiceData}
+            handleDelete={this.handleDelete}
+            editInvoiceOptions={this.props.editInvoiceOptions}
+          />
+        );
+
+        listItems.push(item);
+      });
+
+      return listItems;
+    }
+
+  };
+
+  handleDelete = (invoiceId: string): void => {
+    API.deleteInvoiceById(this.context.authData.accessToken, invoiceId)
+    .then(() => {
+      let newInvoices = this.state.invoices.filter(
+        (invoice: any) => invoice.invoiceId !== invoiceId
       );
-
-      listItems.push(item);
+      
+      this.setState({ invoices: newInvoices });
     });
+  };
 
-    return listItems;
-  }
 
-  initHandler(invoiceId: string): void {
-    API.deleteInvoiceById(this.props.userData.accessToken, invoiceId).then(res => {
-
-      let newInvoices = this.state.invoices.filter((invoice: any) => invoice.invoiceId !== invoiceId);
-      this.setState({invoices: newInvoices}); // This method is faster
-
-      // this.setState({ init: false });  // This method have slow reaction
-    });
-  }
-  
   render() {
     if (!this.state.init) {
       this.getAPI();
     }
 
-    return(
+    let content: any = null;
+
+    if (!this.state.init) {
+      content = null;
+    } else if (this.state.invoices.length) {
+      content = this.getInvoicesItems();
+    } else if (this.state.init && !this.state.invoices.length) {
+      content = <h1 className="text-center h2 mt-4">You don't have invoices yet.</h1>;
+    }
+
+    return (
       <div className="col-lg-9 col-md-9 col-sm-12 col-xs-11 p-2 invoices-list">
-        {
-         this.state.invoices.length
-         ? this.setInvoicesItems()
-         : this.state.init === true 
-         ? (<h1 className="text-center h2 mt-4">You don't have invoices yet.</h1>) 
-         : ''
-        }
+        {content}
       </div>
     );
   }

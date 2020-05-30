@@ -21,8 +21,8 @@ const ProductsInput = (props: any) => {
     return options;
   };
 
-  const addProduct = (e: any) => {
-    e.preventDefault();
+  const addProduct = (event: React.MouseEvent<HTMLButtonElement>): void =>  {
+    event.preventDefault();
     if (currentSelect === 'none') {
       return;
     } else {
@@ -30,19 +30,23 @@ const ProductsInput = (props: any) => {
     }
   };
 
-  const selectHandler = (e: any): void => {
-    setCurrentSelect(e.target.value);
+  const selectHandler = (event: React.ChangeEvent<HTMLSelectElement>): void => {
+    setCurrentSelect(event.target.value);
   };
 
   return (
     <div className="row mb-3">
       <div className="col-12 text-left">
-        <label htmlFor="add-product">Product</label>
+        <label htmlFor="add-product">
+          Product
+        </label>
       </div>
 
       <div className="col-lg-8 col-md-8 col-sm-12">
           <select className="form-control" id="add-product" onChange={selectHandler}>
-            <option value="none">Select product</option>
+            <option value="none">
+              Select product
+            </option>
 
             {setProductsOption()}
             
@@ -50,7 +54,10 @@ const ProductsInput = (props: any) => {
       </div>
 
       <div className="col-lg-4 col-md-4 col-sm-12 text-right add-product-btn">
-        <button className="btn btn-add-product" onClick={addProduct}>Add product</button>
+        <button
+         className="btn btn-add-product" 
+         onClick={addProduct}
+         > Add product </button>
       </div>  
     </div>
   );

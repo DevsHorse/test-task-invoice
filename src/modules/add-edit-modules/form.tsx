@@ -1,55 +1,53 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import API from '../model';
+import AuthContext from '../context';
 
 //Components
 import CustomerInput from './cusomer';
 import ProductsInput from './products';
 import ProductItem from './product-item';
 
-interface InvoiceData {
-  customerId?: string,
-  createdById?: string,
-  discount?: number,
-  total?: number
-}
+type InvoiceData = {
+  customerId?: string;
+  createdById?: string;
+  discount?: number;
+  total?: number;
+};
 
 class AddEditForm extends React.Component {
-  props: any;
-  state: any;
-  pageMod: string;
+  static contextType = AuthContext;
+  public props: any;
+  public state: any;
+  public pageMod: 'add' | 'edit';
 
   constructor(props: any) {
     super(props);
-    this.customerHandler = this.customerHandler.bind(this);
-    this.addProductHandler = this.addProductHandler.bind(this);
-    this.deleteProductHandler = this.deleteProductHandler.bind(this);
-    this.quantityHandler = this.quantityHandler.bind(this);
-    this.discountHandler = this.discountHandler.bind(this);
-    this.addInvoice = this.addInvoice.bind(this);
     this.pageMod = props.pageMod;
 
     this.state = {
       customer: '',
       products: [],
       discount: 0,
-      totalInvoicePrice: 0
+      totalInvoicePrice: 0,
+      redirect: false
     };
   }
 
-  componentDidMount() {
+  componentDidMount = () => {
     this.setTotalInvoicePrice();
-  };
+  }
 
-  componentDidUpdate() {
+  componentDidUpdate = () => {
     if (this.state.products.length) {
       this.setTotalInvoicePrice();
+
     } else if (this.state.totalInvoicePrice > 0) {
       this.setState({totalInvoicePrice: 0});
     }
   }
 
-  setTotalInvoicePrice() {
+  setTotalInvoicePrice = () => {
       if (this.state.products.length) {
         let totalSum = this.state.products.reduce((sum: number, item: any) => {
           return sum += item.totalPrice;
@@ -59,7 +57,7 @@ class AddEditForm extends React.Component {
           totalSum -= (totalSum / 100) * this.state.discount;
         }
     
-        totalSum = totalSum.toFixed(2);
+        totalSum = +totalSum.toFixed(2);
   
         if (this.state.totalInvoicePrice !== totalSum) {
           this.setState({totalInvoicePrice: totalSum});
@@ -69,24 +67,28 @@ class AddEditForm extends React.Component {
       } 
   }
 
-  customerHandler(customerId: string): void {
-    if (this.pageMod === 'add') this.setState({customer: customerId});
-    else {
-       let data = {
-        customerId: customerId
-       };
+  customerHandler = (customerId: string): void => {
+    if (this.pageMod === 'add') {
+      this.setState({customer: customerId});
+    } else {
+      let data = {
+       customerId: customerId
+      };
 
       API.updateInvoiceById(
-        this.props.userData.token,
+        this.context.authData.accessToken,
         this.props.invoiceData.invoiceId,
         data
       ).then(invoice =>  {
-        this.setState({customer: invoice.customerId});
+        this.setState({
+          customer: invoice.customerId
+        });
       });
-    }
+   }
+    
   }
 
-  addProductHandler(productId: string): void {
+  addProductHandler = (productId: string): void => {
 
     let productPrice: number = 0;
 
@@ -119,27 +121,37 @@ class AddEditForm extends React.Component {
         invoiceId: this.props.invoiceData.invoiceId
       };
 
-      API.setItemToInvoice(this.props.userData.token, itemData).then(() => {
+      API.setItemToInvoice(
+        this.context.authData.accessToken, 
+        itemData
+      ).then(() => {
         this.setState(productItemTemplate);
       });
-    }
-    
+    } 
   }
 
-  quantityHandler(event: any, uniqId: string): void {
+  quantityHandler = (event: React.ChangeEvent<HTMLInputElement>, uniqId: string): void => {
+
+    const quantityValue = +event.target.value > 0 || event.target.value === '' ? event.target.value : 1;
+
     const newProducts = this.state.products.map((product: any) => {
       if (product.uniqId === uniqId) {
-        product.quantity = event.target.value > 0 ? event.target.value : 1;
+        product.quantity = quantityValue;
         product.totalPrice = product.price * product.quantity;
       } 
       return product;
     });
 
-    if (this.pageMod === 'add') this.setState({products: [...newProducts]}); 
-    else this.updateInvoiceAndItemsHandler('quantity', newProducts);
+    if (this.pageMod === 'add') {
+      this.setState({
+        products: [...newProducts]
+      }); 
+    } else {
+      this.updateInvoiceAndItemsHandler('quantity', newProducts);
+    }
   }
 
-  deleteProductHandler(uniqId: string): void {
+  deleteProductHandler = (uniqId: string): void => {
 
     const newStateData = {
         products: [
@@ -149,23 +161,24 @@ class AddEditForm extends React.Component {
         ]
     };
 
-    if (this.pageMod === 'add') this.setState(newStateData);
-    else {
-          let currentItem = this.state.products.filter(
-            (product: any) => product.uniqId === uniqId
-          )[0];
+    if (this.pageMod === 'add') {
+      this.setState(newStateData);
+    } else {
+      let currentItem = this.state.products.filter(
+        (product: any) => product.uniqId === uniqId
+      )[0];
 
-          API.deleteItemById(
-            this.props.userData.token, 
-            this.props.invoiceData.invoiceId,
-            currentItem.itemId
-          ).then(() => this.setState(newStateData));
-        }
+      API.deleteItemById(
+        this.context.authData.accessToken, 
+        this.props.invoiceData.invoiceId,
+        currentItem.itemId
+      ).then(() => this.setState(newStateData));
+    }
   }
 
-  setProductItemInList() {
+  setProductItemInList = (): Array<React.ReactNode> => {
 
-    let items: object[] = [];
+    let items: Array<React.ReactNode> = [];
 
     this.state.products.forEach(
       (item: any) => {
@@ -191,26 +204,31 @@ class AddEditForm extends React.Component {
     return items;
   }
 
-  discountHandler(e: any): void {
-    if (this.pageMod === 'add') this.setState({discount: e.target.value});
-    else {
-      let discountValue = e.target.value;
+  discountHandler = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    if (this.pageMod === 'add') {
+      this.setState({discount: event.target.value});
+    } else {
+      let discountValue = event.target.value;
 
       let data = {
-       discount: discountValue,
-       total: this.state.totalInvoicePrice
+        discount: discountValue,
+        total: this.state.totalInvoicePrice
       };
 
-     API.updateInvoiceById(
-       this.props.userData.token, 
-       this.props.invoiceData.invoiceId, 
-       data
-    ).then(() => this.setState({discount: discountValue}));
+      API.updateInvoiceById(
+        this.context.authData.accessToken, 
+        this.props.invoiceData.invoiceId, 
+        data
+      ).then(() => {
+        this.setState({
+          discount: discountValue
+        })
+      });
    }
   }
 
-  addInvoice(e: any): void {
-    e.preventDefault();
+  addInvoice = (event: React.MouseEvent<HTMLButtonElement | HTMLLinkElement>): void => {
+    event.preventDefault();
 
     if (!this.state.products.length || !this.state.customer) {
       return;
@@ -218,13 +236,13 @@ class AddEditForm extends React.Component {
 
     let invoiceData = {
       customerId: this.state.customer,
-      createdById: this.props.userData.userId,
+      createdById: this.context.authData.userId,
       discount: this.state.discount,
       total: this.state.totalInvoicePrice
     }
 
     API.setInvoice(
-      this.props.userData.token, 
+      this.context.authData.accessToken, 
       invoiceData
       ).then(invoiceRes => {
 
@@ -237,14 +255,14 @@ class AddEditForm extends React.Component {
           };
 
           API.setItemToInvoice(
-            this.props.userData.token, 
+            this.context.authData.accessToken, 
             itemData
           ).then(() => this.props.history.push('/home'));
       });
     });
   }
 
-  setAddButton(): React.ReactNode | undefined {
+  setAddButton = (): React.ReactNode | undefined => {
     if (this.pageMod === 'add') {
       return (
         <button 
@@ -255,7 +273,13 @@ class AddEditForm extends React.Component {
     } 
   }
 
-  setCancelButton(): React.ReactNode {
+  setCancelButton = (): React.ReactNode => {
+    
+    const setRedirectStatus = (event: React.MouseEvent<HTMLButtonElement | HTMLLinkElement>): void => {
+      event.preventDefault();
+      this.setState({redirect: true});
+    };
+
     if (this.pageMod === 'add') {
       return (
         <Link to='/home'>
@@ -266,22 +290,17 @@ class AddEditForm extends React.Component {
       return (
         <button 
           className="btn btn-home-delete ml-2" 
-          onClick={(e) => 
-            {
-              e.preventDefault();
-              this.setState({redirect: true});
-            }
-          }
+          onClick={setRedirectStatus}
         >Cancel</button>
       )
     }
   }
 
-  updateInvoiceAndItemsHandler(mode: string, quantityArray?: any): void {
+  updateInvoiceAndItemsHandler = (mode: string, quantityArray?: any): void => {
 
     let invoiceData: InvoiceData = {
       customerId: this.state.customer,
-      createdById: this.props.userData.userId,
+      createdById: this.context.authData.userId,
       discount: this.state.discount,
       total: this.state.totalInvoicePrice
     };
@@ -293,10 +312,10 @@ class AddEditForm extends React.Component {
     }
 
     API.updateInvoiceById(
-      this.props.userData.token, 
+      this.context.authData.accessToken, 
       this.props.invoiceData.invoiceId, 
       invoiceData
-    ).then(invoiceRes => {
+    ).then(() => {
       this.state.products.forEach((product: any) => {
 
         let itemData = {
@@ -306,33 +325,41 @@ class AddEditForm extends React.Component {
         };
 
         API.updateItemById(
-          this.props.userData.token, 
+          this.context.authData.accessToken, 
           this.props.invoiceData.invoiceId, 
           product.itemId, 
           itemData
-        ).then((res) => {
-          if (mode === 'done') this.props.history.push('/home');
-          else if (mode === 'quantity') this.setState({products: [...quantityArray]});
+        ).then(() => {
+
+          if (mode === 'done') {
+            this.props.history.push('/home');
+
+          } else if (mode === 'quantity') {
+            this.setState({
+              products: [...quantityArray]
+            });
+          } 
         });
       });
     });
   }
 
-  setEditState(): void {
-    API.getInvoiceById(
-      this.props.userData.token, 
-      this.props.invoiceData.invoiceId
-    ).then(invoiceRes => {
-
-      API.getItemsOfInvoice(
-        this.props.userData.token, 
+  setEditModeState = (): void => {
+    Promise.all([
+      API.getInvoiceById(
+        this.context.authData.accessToken, 
         this.props.invoiceData.invoiceId
-      ).then(items => {
+      ),
+      API.getItemsOfInvoice(
+        this.context.authData.accessToken, 
+        this.props.invoiceData.invoiceId
+      )
+    ])
+    .then(([invoiceRes, itemsRes]) => {
 
         let productsArray: any = [];
 
-        items.forEach((item: any, i: number) => {
-
+        itemsRes.forEach((item: any, i: number) => {
           let currentProduct = this.props.products.filter(
             (product: any) => item.productId === product.id
           )[0];
@@ -356,73 +383,75 @@ class AddEditForm extends React.Component {
             discount: invoiceRes.discount
           });
         }
-      });
-
     });
   }
 
   render() {
     if (!this.state.products.length && this.pageMod === 'edit') {
-      this.setEditState();
+      this.setEditModeState();
     }
 
     if (this.state.redirect) {
       this.updateInvoiceAndItemsHandler('done');
     }
 
+    const discountValue = this.state.discount === 0 ? '' : this.state.discount;
+
     return (
       <form>
-{/* Total */}
-                <div className="row mb-3">
-                  <div className="col-12 text-left">
-                    <div className="total ts-2 h3">Total price: {this.state.totalInvoicePrice}</div>
-                  </div>
-                </div>
+      {/* Total */}
+        <div className="row mb-3">
+          <div className="col-12 text-left">
+            <div className="total ts-2 h3">
+              Total price: {this.state.totalInvoicePrice}
+            </div>
+          </div>
+        </div>
 
-{/* Customer input */}
-                <div className="row mb-3">
-                  <CustomerInput
-                   customers={this.props.customers} 
-                   customerHandler={this.customerHandler}
-                   pageMod={this.props.pageMod}
-                   invoiceData={this.props.invoiceData}
-                   customerId={this.state.customer}
-                  /> 
-                </div>
+      {/* Customer input */}
+        <div className="row mb-3">
+          <CustomerInput
+            customers={this.props.customers} 
+            customerHandler={this.customerHandler}
+            pageMod={this.props.pageMod}
+            invoiceData={this.props.invoiceData}
+            customerId={this.state.customer}
+          /> 
+        </div>
 
-{/* Product input */}
-                
-                <ProductsInput
-                 products={this.props.products} 
-                 addProductHandler={this.addProductHandler}
-                />
+      {/* Product input */}
+        <ProductsInput
+          products={this.props.products} 
+          addProductHandler={this.addProductHandler}
+        />
 
-{/* Added products */}
-                <div className="row">
+      {/* Added products */}
+        <div className="row">
+          {this.setProductItemInList()}
+        </div>
 
-                  {this.setProductItemInList()}
-      
-                </div>
+      {/* Discount and ADD */}
+        <div className="row justify-content-between mt-3 align-items-end">
+          <div className="col-lg-5 col-md-5 col-sm-12 text-left">
+            <label htmlFor="discount-input">
+              Discount
+            </label>
 
-{/* Discount and ADD */}
-                <div className="row justify-content-between mt-3 align-items-end">
-                  <div className="col-lg-5 col-md-5 col-sm-12 text-left">
-                    <label htmlFor="discount-input">Discount</label>
-                    <input 
-                    type="text" 
-                    className="form-control" 
-                    id="discount-input" 
-                    placeholder="Discount in %" 
-                    onChange={this.discountHandler} 
-                    value={this.state.discount === 0 ? '' : this.state.discount}/>
-                  </div>
-                  <div className="col-lg-5 col-md-5 col-sm-12 text-right add-invoice-form-btn">
-                    {this.setAddButton()}
-                    {this.setCancelButton()}
-                  </div>
-                </div>
+            <input 
+            type="text" 
+            className="form-control" 
+            id="discount-input" 
+            placeholder="Discount in %" 
+            onChange={this.discountHandler} 
+            value={discountValue}/>
+          </div>
 
-              </form>
+          <div className="col-lg-5 col-md-5 col-sm-12 text-right add-invoice-form-btn">
+            {this.setAddButton()}
+            {this.setCancelButton()}
+          </div>
+        </div>
+      </form>
     );
   }
 }

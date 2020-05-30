@@ -1,299 +1,176 @@
 interface InvoiceData {
-  customerId: string,
-  createdById: string,
-  discount: number,
-  total: number
+  customerId: string;
+  createdById: string;
+  discount: number;
+  total: number;
 }
 
 interface ItemData {
-  quantity: number,
-  productId: string,
-  invoiceId: string
+  quantity: number;
+  productId: string;
+  invoiceId: string;
+}
+
+interface ApiRequestOptions {
+  authToken?: string;
+  data?: object;
+  headers?: object;
+  mode?: string;
+}
+
+function apiRequest(apiUrl: string) {
+  return (method: string, endpoint: string, options?: ApiRequestOptions) => {
+    
+    let requestHeaders: Record<string, string> = {
+      'Content-Type': 'application/json'
+    }
+    let requestBody: any = null;
+
+    if (typeof options === 'object') {
+      if (typeof options.headers === 'object') {
+        requestHeaders = { ...requestHeaders, ...options.headers };
+      }
+
+      if (typeof options.authToken === 'string') {
+        requestHeaders = { ...requestHeaders, 'Authorization': options.authToken }
+      }
+
+      if (options.data != null) {
+        if (typeof options.data !== 'string') {
+          requestBody = JSON.stringify(options.data);
+        } else {
+          requestBody = options.data;
+        }
+      }
+    }
+
+    const requestOptions = {
+      headers: requestHeaders,
+      body: requestBody,
+      method
+    };
+
+    return fetch(`${ apiUrl }/${ endpoint }`, requestOptions).then(res => {
+      if (options && options.mode) return res;
+      else return res.json();
+    });
+  }
 }
 
 class API {
 
+  static apiRequest = apiRequest('https://ing-invoicing.herokuapp.com/api');
+
   static register(userData: any) {
-
-    async function asyncRequest() {
-
-      const response = await fetch('https://ing-invoicing.herokuapp.com/api/ing-users', {
-        method: 'POST',
-        body: JSON.stringify(userData),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-
-      return await response.json();
-    };
-
-    return asyncRequest();
+    return API.apiRequest('POST', '/ing-users', {
+       data: userData 
+    });
   }
 
   static login(userData: any) {
-
-    async function asyncRequest() {
-
-      const response = await fetch('https://ing-invoicing.herokuapp.com/api/ing-users/login', {
-        method: 'POST',
-        body: JSON.stringify(userData),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      return await response.json();
-    };
-
-    return asyncRequest();
+    return API.apiRequest('POST', '/ing-users/login', {
+      data: userData 
+    });
   }
-  
+
   static logOut(accessToken: string) {
-
-    async function asyncRequest() {
-      
-      const response = await fetch('https://ing-invoicing.herokuapp.com/api/ing-users/logout', {
-         method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': accessToken
-            },
-            mode: 'cors',
-            cache: 'default'
-      });
-
-      return await response;
-    };
-
-    return asyncRequest();
-
+    return API.apiRequest('POST', '/ing-users/logout', {
+      authToken: accessToken,
+      mode: 'non-json()'
+    });
   }
 
   static getCustomers(accessToken: string) {
- 
-    async function asyncRequest() {
-      
-      const response = await fetch('https://ing-invoicing.herokuapp.com/api/customers', {
-         method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': accessToken
-            },
-            mode: 'cors',
-            cache: 'default'
-      });
-
-      return await response.json();
-    };
-
-    return asyncRequest();
+    return API.apiRequest('GET', '/customers', {
+      authToken: accessToken
+    });
   }
 
   static getProducts(accessToken: string) {
- 
-    async function asyncRequest() {
-      
-      const response = await fetch('https://ing-invoicing.herokuapp.com/api/products', {
-         method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': accessToken
-            },
-            mode: 'cors',
-            cache: 'default'
-      });
-
-      return await response.json();
-    };
-
-    return asyncRequest();
+    return API.apiRequest('GET', '/products', {
+      authToken: accessToken
+    });
   }
 
   static getInvoices(accessToken: string) {
-    async function asyncRequest() {
-      
-      const response = await fetch('https://ing-invoicing.herokuapp.com/api/invoices', {
-         method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': accessToken
-            },
-            mode: 'cors',
-            cache: 'default'
-      });
-
-      return await response.json();
-    };
-
-    return asyncRequest();
+    return API.apiRequest('GET', '/invoices', {
+      authToken: accessToken
+    });
   }
 
   static setInvoice(accessToken: string, invoiceData: InvoiceData) {
-    async function asyncRequest() {
-
-      const response = await fetch('https://ing-invoicing.herokuapp.com/api/invoices', {
-        method: 'POST',
-        body: JSON.stringify(invoiceData),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': accessToken
-        }
-      });
-
-      return await response.json();
-    };
-
-    return asyncRequest();
+    return API.apiRequest('POST', '/invoices', {
+      authToken: accessToken,
+      data: invoiceData
+    });
   }
 
   static setItemToInvoice(accessToken: string, itemData: ItemData) {
-    async function asyncRequest() {
+    const endPath = `/invoices/${itemData.invoiceId}/items`;
 
-      const response = await fetch('https://ing-invoicing.herokuapp.com/api/invoices/' + itemData.invoiceId + '/items' , {
-        method: 'POST',
-        body: JSON.stringify(itemData),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': accessToken
-        }
-      });
-
-      return await response.json();
-    };
-
-    return asyncRequest();
+    return API.apiRequest('POST', endPath, {
+      authToken: accessToken,
+      data: itemData
+    });
   }
 
-  static getItemsOfInvoice(accessToken: string, idInvoice: string) {
-    async function asyncRequest() {
-      
-      const response = await fetch('https://ing-invoicing.herokuapp.com/api/invoices/' + idInvoice + '/items', {
-         method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': accessToken
-            },
-            mode: 'cors',
-            cache: 'default'
-      });
+  static getItemsOfInvoice(accessToken: string, idInvoice: string)  {
+    const endPath = `/invoices/${idInvoice}/items`;
 
-      return await response.json();
-    };
-
-    return asyncRequest();
+    return API.apiRequest('GET', endPath, {
+      authToken: accessToken
+    });
   }
 
   static getInvoiceById(accessToken: string, invoiceId: string) {
-    async function asyncRequest() {
-      
-      const response = await fetch('https://ing-invoicing.herokuapp.com/api/invoices/' + invoiceId, {
-         method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': accessToken
-            },
-            mode: 'cors',
-            cache: 'default'
-      });
+    const endPath = `/invoices/${invoiceId}`;
 
-      return await response.json();
-    };
-
-    return asyncRequest();
+    return API.apiRequest('GET', endPath, {
+      authToken: accessToken
+    });
   }
 
   static getCustomerById(accessToken: string, customerId: string) {
-    async function asyncRequest() {
-      
-      const response = await fetch('https://ing-invoicing.herokuapp.com/api/customers/' + customerId, {
-         method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': accessToken
-            },
-            mode: 'cors',
-            cache: 'default'
-      });
+    const endPath = `/customers/${customerId}`;
 
-      return await response.json();
-    };
-
-    return asyncRequest();
+    return API.apiRequest('GET', endPath, {
+      authToken: accessToken
+    });
   }
 
   static deleteInvoiceById(accessToken: string, invoiceId: string) {
-    async function asyncRequest() {
-      
-      const response = await fetch('https://ing-invoicing.herokuapp.com/api/invoices/' + invoiceId, {
-         method: 'DELETE',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': accessToken
-            },
-            mode: 'cors',
-            cache: 'default'
-      });
+    const endPath = `/invoices/${invoiceId}`;
 
-      return await response.json();
-    };
-
-    return asyncRequest();
+    return API.apiRequest('DELETE', endPath, {
+      authToken: accessToken
+    });
   }
 
   static updateInvoiceById(accessToken: string, invoiceId: string, invoiceData: any) {
-    async function asyncRequest() {
-      
-      const response = await fetch('https://ing-invoicing.herokuapp.com/api/invoices/' + invoiceId, {
-        method: 'PATCH',
-        body: JSON.stringify(invoiceData),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': accessToken
-        }
-      });
+    const endPath = `/invoices/${invoiceId}`;
 
-      return await response.json();
-    };
-
-    return asyncRequest();
+    return API.apiRequest('PATCH', endPath, {
+      authToken: accessToken,
+      data: invoiceData
+    });
   }
 
   static updateItemById(accessToken: string, invoiceId: string, itemId: string, itemData: any) {
-    async function asyncRequest() {
-      
-      const response = await fetch('https://ing-invoicing.herokuapp.com/api/invoices/' + invoiceId + '/items/' + itemId, {
-        method: 'PUT',
-        body: JSON.stringify(itemData),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': accessToken
-        }
-      });
+    const endPath = `/invoices/${invoiceId}/items/${itemId}`;
 
-      return await response.json();
-    };
-
-    return asyncRequest();
+    return API.apiRequest('PUT', endPath, {
+      authToken: accessToken,
+      data: itemData
+    });
   }
 
   static deleteItemById(accessToken: string, invoiceId: string, itemId: string) {
-    async function asyncRequest() {
-      
-      const response = await fetch('https://ing-invoicing.herokuapp.com/api/invoices/' + invoiceId + '/items/' + itemId, {
-         method: 'DELETE',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': accessToken
-            },
-            mode: 'cors',
-            cache: 'default'
-      });
+    const endPath = `/invoices/${invoiceId}/items/${itemId}`;
 
-      return response;
-    };
-
-    return asyncRequest();
+    return API.apiRequest('DELETE', endPath, {
+      authToken: accessToken,
+      mode: 'non-json()'
+    });
   }
 }
 
