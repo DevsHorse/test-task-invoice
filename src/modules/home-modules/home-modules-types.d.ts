@@ -16,7 +16,7 @@ export type ItemsListProps = {
   }
 };
 
-export type StateType = {
+export type ItemListStateType = {
   invoices: Array<InvoiceData | null>;
   init: boolean;
 };
@@ -30,7 +30,7 @@ export type InvoiceItemProps = {
     invoiceId: string,
     total: number
   },
-  handleDelete: (invoiceId: string) => void,
+  handleDeleteInvoice: (invoiceId: string) => void,
   editInvoiceOptions: {
     pathname: string,
     state: {

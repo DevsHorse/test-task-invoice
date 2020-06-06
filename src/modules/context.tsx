@@ -15,7 +15,7 @@ export type AuthData = {
 
 export interface IContext {
   authData: AuthData;
-  handleState: (userData: AuthData) => void;
+  setNewAuthState: (userData: AuthData) => void;
 }
 
 const cookie: Cookie = ((): Cookie => {
@@ -39,7 +39,7 @@ export const authDataFromCookie: AuthData = {
 
 const AuthContext = React.createContext<IContext>({
   authData: authDataFromCookie,
-  handleState: (userData: AuthData) => void {},
+  setNewAuthState: (userData: AuthData) => void {},
 });
 
 export default AuthContext;

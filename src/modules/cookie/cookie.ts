@@ -1,4 +1,3 @@
-
 export const setCookie = (key: string, value: string, year: number, month: number, day: number): void => {
   let cookieStr = encodeURI(key) + '=' + encodeURI(value);
 
@@ -11,9 +10,9 @@ export const setCookie = (key: string, value: string, year: number, month: numbe
 };
 
 export const getAuthCookie = (): object => {
-  const regExp = /^auth=/;
+  const regAuth = /^auth=/;
   const auth = decodeURI(document.cookie).split('; ').filter(cookie => {
-    if (regExp.test(cookie)) {
+    if (regAuth.test(cookie)) {
       return cookie;
     }
   });

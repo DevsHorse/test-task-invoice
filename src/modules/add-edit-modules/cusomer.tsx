@@ -3,7 +3,6 @@ import React from 'react';
 
 const CustomerInput = (props: any) => {
 
-
   const setCustomersOption = (): object[] => {
     let options: object[] = [];
 

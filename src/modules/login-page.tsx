@@ -1,7 +1,10 @@
+//Lib
 import React from 'react';
+import { Link } from 'react-router-dom';
 import API from './model';
 import AuthContext from './context';
-import { Link } from 'react-router-dom';
+
+//types
 import { LoginPageStateType } from './pages-types';
 
 
@@ -30,16 +33,16 @@ class LoginPage extends React.Component {
       this.state.userData.password === ''
     ) return;
 
-    this.login();
+    this.loginUser();
   };
 
-  login = (): void => {
+  loginUser = (): void => {
     API.login(this.state.userData)
     .then((res) => {
       if (res.error) {
         this.setState({ error: res.error.message });
       } else {
-        this.context.handleState({
+        this.context.setNewAuthState({
           isAuthenticated: true,
           userId: res.userId,
           accessToken: res.id,
@@ -103,14 +106,21 @@ class LoginPage extends React.Component {
 
             <div className="row justify-content-center">
               <div className="col">
-                <button type="submit" className="btn btn-sign btn-block" onClick={this.handleLogin}>
-                  Sign in ⚡
+                <button 
+                  type="submit" 
+                  className="btn btn-sign btn-block" 
+                  onClick={this.handleLogin}
+                  >
+                    Sign in ⚡
                 </button>
               </div>
 
               <div className="col ml-2">
                 <Link to="/register" className="text-decoration-none">
-                  <button type="button" className="btn btn-edit-btn btn-block">
+                  <button
+                   type="button" 
+                   className="btn btn-edit-btn btn-block"
+                   >
                     Register
                   </button>
                 </Link>

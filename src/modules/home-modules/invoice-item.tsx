@@ -5,9 +5,13 @@ import { InvoiceItemProps } from './home-modules-types';
 
 const InvoiceItem = (props: InvoiceItemProps) => {
 
-  const deleteItem = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const deleteItem = () => {
+    props.handleDeleteInvoice(props.invoiceData.invoiceId);
+  };
+
+  const handleDeleteItem = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
-    props.handleDelete(props.invoiceData.invoiceId);
+    deleteItem();
   };
 
   let editData = {
@@ -54,8 +58,10 @@ const InvoiceItem = (props: InvoiceItemProps) => {
 
               <button 
                 className="btn btn-home-delete ml-2" 
-                onClick={deleteItem}
-              > del </button>
+                onClick={handleDeleteItem}
+              >
+                del
+              </button>
             </div>
           </div>
         </div>

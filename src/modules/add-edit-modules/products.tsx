@@ -4,21 +4,31 @@ const ProductsInput = (props: any) => {
 
   let [currentSelect, setCurrentSelect] = useState('none');
 
-  const setProductsOption = (): object[] => {
-    let options: object[] = [];
+  const getProductsOption = (): Array<React.ReactNode> => {
 
-    props.products.forEach((product: any, i: number) => {
-      
-      let option = (
+    const options: Array<React.ReactNode> = props.products
+    .reduce((
+        onptionsArray: Array<React.ReactNode>,
+        product: any,
+        i: number
+    ) => {
+
+      let option: React.ReactNode = (
         <option key={i} value={product.id}>
           {product.name + ' --- ' + product.price + '$'}
         </option>
       );
-    
-      options.push(option);
-    });
+
+      onptionsArray.push(option);
+      
+      return onptionsArray;
+    }, []);
 
     return options;
+  };
+
+  const addProductHandler = () => {
+    props.addProductHandler(currentSelect);
   };
 
   const addProduct = (event: React.MouseEvent<HTMLButtonElement>): void =>  {
@@ -26,7 +36,7 @@ const ProductsInput = (props: any) => {
     if (currentSelect === 'none') {
       return;
     } else {
-      props.addProductHandler(currentSelect);
+      addProductHandler();
     }
   };
 
@@ -43,12 +53,16 @@ const ProductsInput = (props: any) => {
       </div>
 
       <div className="col-lg-8 col-md-8 col-sm-12">
-          <select className="form-control" id="add-product" onChange={selectHandler}>
+          <select
+           className="form-control" 
+           id="add-product" 
+           onChange={selectHandler}
+           >
             <option value="none">
               Select product
             </option>
 
-            {setProductsOption()}
+            {getProductsOption()}
             
           </select>
       </div>
@@ -57,7 +71,9 @@ const ProductsInput = (props: any) => {
         <button
          className="btn btn-add-product" 
          onClick={addProduct}
-         > Add product </button>
+        > 
+         Add product
+        </button>
       </div>  
     </div>
   );

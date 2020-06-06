@@ -3,8 +3,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import API from './model';
 import AuthContext from './context';
+
 //Modules
 import ItemsList from './home-modules/items-list';
+
+//types
 import { Mode, AddEditInvoiceOptions } from './pages-types';
 
 
@@ -23,7 +26,7 @@ class HomePage extends React.Component {
   logOut = (): void => {
     API.logOut(this.context.authData.accessToken)
       .then(() => {
-        this.context.handleState({
+        this.context.setNewAuthState({
           isAuthenticated: false,
           userId: '',
           accessToken: '',
@@ -32,7 +35,7 @@ class HomePage extends React.Component {
       .catch((error) => new Error(error));
   };
 
-  addEditInvoiceOptions = (mode: Mode): AddEditInvoiceOptions => {
+  getAddEditInvoiceOptions = (mode: Mode): AddEditInvoiceOptions => {
     const options: AddEditInvoiceOptions = {
       pathname: '/add-edit-invoice',
       state: {
@@ -55,7 +58,9 @@ class HomePage extends React.Component {
 
             <div className="col d-flex flex-column justify-content-between text-center aside-container">
 
-              <Link to={this.addEditInvoiceOptions('add')}>
+              <Link 
+                to={this.getAddEditInvoiceOptions('add')}
+              >
                 <button className="btn btn-add-btn mt-3 border-white add-btn w-100">
                   Add invoice
                 </button>
@@ -70,7 +75,7 @@ class HomePage extends React.Component {
         </div>
 
         <ItemsList
-          editInvoiceOptions={this.addEditInvoiceOptions('edit')}
+          editInvoiceOptions={this.getAddEditInvoiceOptions('edit')}
         />
 
       </div>

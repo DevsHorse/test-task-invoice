@@ -33,11 +33,11 @@ class App extends React.Component {
 
     this.state = {
       authData: authDataFromCookie,
-      handleState: this.handleState,
+      setNewAuthState: this.setNewAuthState,
     };
   }
 
-  handleState = (userData: AuthData): void => {
+  setNewAuthState = (userData: AuthData): void => {
     const newAuthData: AuthData = {
       isAuthenticated: userData.isAuthenticated,
       userId: userData.userId,
@@ -50,8 +50,14 @@ class App extends React.Component {
 
   render() {
     const isAuthenticated = this.state.authData.isAuthenticated;
-    const loginRoute = isAuthenticated ? <Redirect to="/home" /> : <LoginPage />;
-    const homeRoute = isAuthenticated ? <HomePage /> : <Redirect to="/login" />;
+
+    const loginRoute: React.ReactNode = (
+      isAuthenticated ? <Redirect to="/home" /> : <LoginPage />
+    );
+
+    const homeRoute: React.ReactNode = (
+      isAuthenticated ? <HomePage /> : <Redirect to="/login" />
+    );
 
     return (
       <div>
@@ -59,7 +65,9 @@ class App extends React.Component {
           <Switch>
             <AuthContext.Provider value={this.state}>
 
-              <Route exact path="/"> Redirect to="/login" /> </Route>
+              <Route exact path="/"> 
+                <Redirect to="/login"/> 
+              </Route>
 
               <Route path="/login"> {loginRoute} </Route>
 

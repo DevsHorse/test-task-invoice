@@ -1,3 +1,4 @@
+//Lib
 import React from 'react';
 import { Link } from 'react-router-dom';
 import API from '../model';
@@ -49,7 +50,8 @@ class AddEditForm extends React.Component {
 
   setTotalInvoicePrice = () => {
       if (this.state.products.length) {
-        let totalSum = this.state.products.reduce((sum: number, item: any) => {
+        let totalSum = this.state.products
+        .reduce((sum: number, item: any) => {
           return sum += item.totalPrice;
         }, 0);
   
@@ -70,22 +72,22 @@ class AddEditForm extends React.Component {
   customerHandler = (customerId: string): void => {
     if (this.pageMod === 'add') {
       this.setState({customer: customerId});
+
     } else {
-      let data = {
+      let requestData = {
        customerId: customerId
       };
 
       API.updateInvoiceById(
         this.context.authData.accessToken,
         this.props.invoiceData.invoiceId,
-        data
+        requestData
       ).then(invoice =>  {
         this.setState({
           customer: invoice.customerId
         });
       });
-   }
-    
+    }
   }
 
   addProductHandler = (productId: string): void => {
@@ -132,9 +134,11 @@ class AddEditForm extends React.Component {
 
   quantityHandler = (event: React.ChangeEvent<HTMLInputElement>, uniqId: string): void => {
 
-    const quantityValue = +event.target.value > 0 || event.target.value === '' ? event.target.value : 1;
+    const value = event.target.value;
+    const quantityValue = (+value > 0 || value === '') ? value : 1;
 
-    const newProducts = this.state.products.map((product: any) => {
+    const newProducts = this.state.products
+    .map((product: any) => {
       if (product.uniqId === uniqId) {
         product.quantity = quantityValue;
         product.totalPrice = product.price * product.quantity;
@@ -146,6 +150,7 @@ class AddEditForm extends React.Component {
       this.setState({
         products: [...newProducts]
       }); 
+
     } else {
       this.updateInvoiceAndItemsHandler('quantity', newProducts);
     }
@@ -178,39 +183,43 @@ class AddEditForm extends React.Component {
 
   setProductItemInList = (): Array<React.ReactNode> => {
 
-    let items: Array<React.ReactNode> = [];
+    const defaultProductsArray = Object.fromEntries(
+      
+      this.props.products.map((product: any) => {
+        return [product.id, product.name];
+      })
+      );
 
-    this.state.products.forEach(
-      (item: any) => {
-        this.props.products.forEach(
-          (product: any) => {
+    const productsOfInvoiceArray = this.state.products
+    .reduce((productItems: Array<React.ReactNode>, item: any, i: number) => {
+      
+      let itemComponent = (
+      <ProductItem
+        productName={defaultProductsArray[item.id]} 
+        key={item.id + i} 
+        deleteProductHandler={this.deleteProductHandler} 
+        quantityHandler={this.quantityHandler}
+        itemOptions={item}
+      />
+      );
+      
+      productItems.push(itemComponent);
+      return productItems;
+      
+    }, []);
 
-            if (product.id === item.id) {
-              let component = (
-                <ProductItem
-                product={product} 
-                key={item.id + '/' + (Math.random() * 10000)} 
-                deleteProductHandler={this.deleteProductHandler} 
-                quantityHandler={this.quantityHandler}
-                itemOptions={item}/>
-              );
-
-              items.push(component);
-            }
-
-        });
-    });
-
-    return items;
+    return productsOfInvoiceArray;
   }
 
   discountHandler = (event: React.ChangeEvent<HTMLInputElement>): void => {
     if (this.pageMod === 'add') {
       this.setState({discount: event.target.value});
+
     } else {
+
       let discountValue = event.target.value;
 
-      let data = {
+      let requestData = {
         discount: discountValue,
         total: this.state.totalInvoicePrice
       };
@@ -218,7 +227,7 @@ class AddEditForm extends React.Component {
       API.updateInvoiceById(
         this.context.authData.accessToken, 
         this.props.invoiceData.invoiceId, 
-        data
+        requestData
       ).then(() => {
         this.setState({
           discount: discountValue
@@ -227,7 +236,7 @@ class AddEditForm extends React.Component {
    }
   }
 
-  addInvoice = (event: React.MouseEvent<HTMLButtonElement | HTMLLinkElement>): void => {
+  addInvoiceHandler = (event: React.MouseEvent<HTMLButtonElement | HTMLLinkElement>): void => {
     event.preventDefault();
 
     if (!this.state.products.length || !this.state.customer) {
@@ -267,8 +276,10 @@ class AddEditForm extends React.Component {
       return (
         <button 
           className="btn btn-add-btn" 
-          onClick={this.addInvoice}
-        >Add invoice</button>
+          onClick={this.addInvoiceHandler}
+        >
+          Add invoice
+        </button>
       );
     } 
   }
@@ -283,7 +294,9 @@ class AddEditForm extends React.Component {
     if (this.pageMod === 'add') {
       return (
         <Link to='/home'>
-          <button className="btn btn-home-delete ml-2">Cancel</button>
+          <button className="btn btn-home-delete ml-2">
+            Cancel
+          </button>
         </Link>
       );
     } else {
@@ -291,7 +304,9 @@ class AddEditForm extends React.Component {
         <button 
           className="btn btn-home-delete ml-2" 
           onClick={setRedirectStatus}
-        >Cancel</button>
+        >
+          Cancel
+        </button>
       )
     }
   }

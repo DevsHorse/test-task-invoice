@@ -1,7 +1,12 @@
+//Lib
 import React from 'react';
 import API from './model';
-import AddEditForm from './add-edit-modules/form';
 import AuthContext from './context';
+
+//Modules
+import AddEditForm from './add-edit-modules/form';
+
+//types
 import { AddEditInvoicePageStateType, InvoiceDataEditProp } from './pages-types';
 
 
@@ -11,6 +16,7 @@ class AddEditInvoice extends React.Component {
   public pageMode: 'add' | 'edit';
   public invoiceData: InvoiceDataEditProp | {};
   public state: AddEditInvoicePageStateType;
+
 
   constructor(props: any) {
     super(props);
@@ -22,7 +28,7 @@ class AddEditInvoice extends React.Component {
     };
   }
 
-  setSelectOptions(): void {
+  getSelectOptions(): void {
     Promise.all([
       API.getCustomers(this.context.authData.accessToken),
       API.getProducts(this.context.authData.accessToken)
@@ -40,7 +46,7 @@ class AddEditInvoice extends React.Component {
   render() {
 
     if (!this.state.customers.length) {
-      this.setSelectOptions();
+      this.getSelectOptions();
     }
 
     return (

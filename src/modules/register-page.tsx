@@ -1,7 +1,10 @@
+//Lib
 import React from 'react';
-import API from './model';
-import AuthContext from './context';
 import { Link } from 'react-router-dom';
+import AuthContext from './context';
+import API from './model';
+
+// Types
 import { RegisterPageStateType } from './pages-types';
 
 
@@ -42,10 +45,10 @@ class RegisterPage extends React.Component {
       if (key === '') return;
     }
 
-    this.register();
+    this.registerNewUser();
   };
 
-  register = (): void => {
+  registerNewUser = (): void => {
     API.register(this.state.userData)
     .then((res) => {
       if (res.error) {
@@ -133,15 +136,22 @@ class RegisterPage extends React.Component {
 
             <div className="row justify-content-center text-center">
               <div className="col-6">
-                <button type="submit" className="btn btn-sign btn-block" onClick={this.handleRegister}>
-                  Sign up ⚡
+                <button 
+                  type="submit" 
+                  className="btn btn-sign btn-block" 
+                  onClick={this.handleRegister}
+                  >
+                    Sign up ⚡
                 </button>
               </div>
 
               <div className="col-6">
                 <Link to="/login" className="text-decoration-none">
-                  <button type="button" className="btn btn-edit-btn btn-block">
-                    Sign in
+                  <button 
+                    type="button" 
+                    className="btn btn-edit-btn btn-block"
+                    >
+                      Sign in
                   </button>
                 </Link>
               </div>

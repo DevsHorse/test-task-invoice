@@ -8,14 +8,14 @@ import InvoiceItem from './invoice-item';
 import {
   InvoiceData,
   ItemsListProps,
-  StateType 
+  ItemListStateType 
 } from './home-modules-types';
 
 
 class ItemsList extends React.Component {
   static contextType = AuthContext;
   public props: ItemsListProps;
-  public state: StateType;
+  public state: ItemListStateType;
 
   constructor(props: ItemsListProps) {
     super(props);
@@ -26,7 +26,7 @@ class ItemsList extends React.Component {
     };
   }
 
-  getAPI = (): void => {
+  getInvoices = (): void => {
     Promise.all([
       API.getInvoices(this.context.authData.accessToken),
       API.getCustomers(this.context.authData.accessToken)
@@ -77,7 +77,7 @@ class ItemsList extends React.Component {
           <InvoiceItem
             key={invoiceData.invoiceId}
             invoiceData={invoiceData}
-            handleDelete={this.handleDelete}
+            handleDeleteInvoice={this.handleDeleteInvoice}
             editInvoiceOptions={this.props.editInvoiceOptions}
           />
         );
@@ -87,10 +87,9 @@ class ItemsList extends React.Component {
 
       return listItems;
     }
-
   };
 
-  handleDelete = (invoiceId: string): void => {
+  handleDeleteInvoice = (invoiceId: string): void => {
     API.deleteInvoiceById(this.context.authData.accessToken, invoiceId)
     .then(() => {
       let newInvoices = this.state.invoices.filter(
@@ -104,7 +103,7 @@ class ItemsList extends React.Component {
 
   render() {
     if (!this.state.init) {
-      this.getAPI();
+      this.getInvoices();
     }
 
     let content: any = null;

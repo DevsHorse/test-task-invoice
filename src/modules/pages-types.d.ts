@@ -1,5 +1,3 @@
-import AddEditInvoice from "./add-edit-invoice";
-
 //Home page - types
 export type Mode = 'add' | 'edit';
 
